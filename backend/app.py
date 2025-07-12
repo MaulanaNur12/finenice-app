@@ -89,19 +89,36 @@ def update_product(id):
 def checkout():
     user_id = int(get_jwt_identity())
     items = request.json['items']
-    total = sum(i['qty'] * i['price'] for i in items)
 
+    # Validasi stok
+    for i in items:
+        cursor.execute("SELECT stock FROM products WHERE id = %s", (i['id'],))
+        product = cursor.fetchone()
+        if not product:
+            return jsonify(msg=f"Produk ID {i['id']} tidak ditemukan"), 404
+        if product['stock'] < i['qty']:
+            return jsonify(msg=f"Stok tidak cukup untuk produk ID {i['id']}"), 400
+
+    # Simpan transaksi
+    total = sum(i['qty'] * i['price'] for i in items)
     cursor.execute("INSERT INTO transactions (user_id, total) VALUES (%s, %s)", (user_id, total))
     trx_id = cursor.lastrowid
 
+    # Simpan item dan kurangi stok
     for i in items:
         cursor.execute(
             "INSERT INTO transaction_items (transaction_id, product_id, quantity, price) VALUES (%s, %s, %s, %s)",
             (trx_id, i['id'], i['qty'], i['price'])
         )
+        cursor.execute(
+            "UPDATE products SET stock = stock - %s WHERE id = %s",
+            (i['qty'], i['id'])
+        )
 
     db.commit()
     return jsonify(msg='Transaksi berhasil')
+
+
 
 @app.route('/transactions', methods=['GET'])
 @jwt_required()

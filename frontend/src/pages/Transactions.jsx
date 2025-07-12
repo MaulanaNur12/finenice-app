@@ -5,7 +5,12 @@ export default function Transactions({ token }) {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    console.log("TOKEN SAAT FETCH TRANSAKSI:", token); // ⬅️ Debug log token
+    if (!token) {
+      setError("Token tidak tersedia, silakan login.");
+      return;
+    }
+
+    console.log("TOKEN SAAT FETCH TRANSAKSI:", token); // Debug token
 
     fetch("http://localhost:5000/transactions", {
       headers: {
@@ -13,7 +18,7 @@ export default function Transactions({ token }) {
       },
     })
       .then((res) => {
-        console.log("RESPON STATUS:", res.status); // ⬅️ Debug status
+        console.log("RESPON STATUS:", res.status); // Debug status
         if (!res.ok) {
           throw new Error("Gagal mengambil data transaksi");
         }
@@ -23,13 +28,16 @@ export default function Transactions({ token }) {
         console.log("DATA TRANSAKSI:", data);
         if (Array.isArray(data)) {
           setTrx(data);
+          setError("");
         } else {
           setError("Data transaksi tidak valid.");
+          setTrx([]);
         }
       })
       .catch((err) => {
         console.error("FETCH ERROR:", err);
         setError("Terjadi kesalahan saat mengambil data transaksi.");
+        setTrx([]);
       });
   }, [token]);
 
@@ -37,7 +45,7 @@ export default function Transactions({ token }) {
     <div className="p-4">
       <h2 className="text-xl font-bold mb-2">My Transactions</h2>
       {error && <p className="text-red-500">{error}</p>}
-      {trx.length === 0 && !error && <p>Belum ada transaksi.</p>}
+      {!error && trx.length === 0 && <p>Belum ada transaksi.</p>}
       <ul className="space-y-2">
         {trx.map((t) => (
           <li

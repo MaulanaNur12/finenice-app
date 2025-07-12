@@ -2,21 +2,35 @@ import { useEffect, useState } from "react";
 
 export default function AllTransactions({ token }) {
   const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!token) return; // 🛡️ Cegah fetch tanpa token
+    if (!token) return;
+
+    setLoading(true);
+    setError(null);
 
     fetch("http://localhost:5000/transactions/all", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     })
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        return res.json();
+      })
       .then((data) => {
-        console.log("ALL TRANSACTIONS:", data); // DEBUG
         setTransactions(data);
-      });
-  }, [token]); // ✅ Tambahkan token sebagai dependency
+      })
+      .catch((err) => {
+        setError(err.message || "Gagal mengambil data transaksi");
+      })
+      .finally(() => setLoading(false));
+  }, [token]);
+
+  if (loading) return <p className="text-white p-6">Loading...</p>;
+  if (error) return <p className="text-red-500 p-6">Error: {error}</p>;
 
   return (
     <div className="text-white p-6">
@@ -32,8 +46,8 @@ export default function AllTransactions({ token }) {
               <p>Total: Rp{t.total.toLocaleString()}</p>
               <p>Tanggal: {new Date(t.created_at).toLocaleString()}</p>
               <ul className="list-disc list-inside mt-2">
-                {t.items.map((item, idx) => (
-                  <li key={idx}>
+                {(t.items ?? []).map((item) => (
+                  <li key={item.id ?? item.product_name}>
                     {item.product_name} - Qty: {item.quantity} - Rp{item.price.toLocaleString()}
                   </li>
                 ))}

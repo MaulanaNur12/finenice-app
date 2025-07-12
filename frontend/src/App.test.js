@@ -1,43 +1,81 @@
-import React from 'react';
-import { render, screen } from '@testing-library/react';
-import App from './App';
-import { MemoryRouter } from 'react-router-dom';
+import { render, screen } from "@testing-library/react";
+import App from "./App";
+import { MemoryRouter } from "react-router-dom";
 
-// Mock semua komponen halaman
-jest.mock('./pages/Login', () => () => <div>Login Mock</div>);
-jest.mock('./pages/Register', () => () => <div>Register Mock</div>);
-jest.mock('./pages/Products', () => () => <div>Products Mock</div>);
-jest.mock('./pages/Checkout', () => () => <div>Checkout Mock</div>);
-jest.mock('./pages/Transactions', () => () => <div>Transactions Mock</div>);
-jest.mock('./pages/AllTransactions', () => () => <div>AllTransactions Mock</div>);
-
-// Mock localStorage
-beforeEach(() => {
-  Storage.prototype.getItem = jest.fn(() => null);
-  Storage.prototype.setItem = jest.fn();
-  Storage.prototype.removeItem = jest.fn();
+// Mock global atob untuk decode JWT payload di test
+beforeAll(() => {
+  global.atob = (input) => {
+    if (input === "userPayload") {
+      return JSON.stringify({ role: "user" });
+    }
+    if (input === "adminPayload") {
+      return JSON.stringify({ role: "admin" });
+    }
+    return JSON.stringify({});
+  };
 });
 
-describe('App Routing and UI', () => {
-  test('renders sidebar with login and register links when not authenticated', () => {
-    render(
-      <MemoryRouter initialEntries={['/']}>
-        <App />
-      </MemoryRouter>
-    );
+// Bersihkan localStorage sebelum tiap test
+beforeEach(() => {
+  localStorage.clear();
+});
 
-    expect(screen.getByText(/Finenice/i)).toBeInTheDocument();
-    expect(screen.getByText(/Login/i)).toBeInTheDocument();
-    expect(screen.getByText(/Register/i)).toBeInTheDocument();
-  });
+test("renders Finenice brand name", () => {
+  render(
+    <MemoryRouter initialEntries={["/"]}>
+      <App />
+    </MemoryRouter>
+  );
+  const brand = screen.getByText(/Finenice/i);
+  expect(brand).toBeInTheDocument();
+});
 
-  test('renders Products component by default', () => {
-    render(
-      <MemoryRouter initialEntries={['/']}>
-        <App />
-      </MemoryRouter>
-    );
+test("shows Login and Register links when not logged in", () => {
+  render(
+    <MemoryRouter initialEntries={["/"]}>
+      <App />
+    </MemoryRouter>
+  );
+  expect(screen.getByText(/Login/i)).toBeInTheDocument();
+  expect(screen.getByText(/Register/i)).toBeInTheDocument();
+});
 
-    expect(screen.getByText(/Products Mock/i)).toBeInTheDocument();
-  });
+test("shows Logout button when user is logged in", () => {
+  localStorage.setItem("token", "header.userPayload.signature");
+  localStorage.setItem("role", "user");
+
+  render(
+    <MemoryRouter initialEntries={["/"]}>
+      <App />
+    </MemoryRouter>
+  );
+
+  expect(screen.getByText(/Logout/i)).toBeInTheDocument();
+});
+
+test("shows Checkout and Transactions links for user role", () => {
+  localStorage.setItem("token", "header.userPayload.signature");
+  localStorage.setItem("role", "user");
+
+  render(
+    <MemoryRouter initialEntries={["/"]}>
+      <App />
+    </MemoryRouter>
+  );
+
+  expect(screen.getByText(/Checkout/i)).toBeInTheDocument();
+  expect(screen.getByText(/Transactions/i)).toBeInTheDocument();
+});
+
+test("shows All Transactions link for admin role", () => {
+  localStorage.setItem("token", "header.adminPayload.signature");
+  localStorage.setItem("role", "admin");
+
+  render(
+    <MemoryRouter initialEntries={["/"]}>
+      <App />
+    </MemoryRouter>
+  );
+
+  expect(screen.getByText(/All Transactions/i)).toBeInTheDocument();
 });

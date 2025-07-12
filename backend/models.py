@@ -1,15 +1,13 @@
+import os
 import mysql.connector
 
-# ❌ HAPUS baris ini karena 'conn' belum didefinisikan:
-# cursor = conn.cursor(dictionary=True)
-
-# ✅ Gunakan koneksi ke database
 db = mysql.connector.connect(
-    host="localhost",       # ini nama service di Docker (jika pakai Docker)
-    user="root",
-    password="password",
-    database="finenice"
+    host=os.getenv("DB_HOST", "localhost"),      # default fallback
+    user=os.getenv("DB_USER", "root"),
+    password=os.getenv("DB_PASSWORD", "password"),
+    database=os.getenv("DB_NAME", "finenice")
 )
+
 
 # ✅ Cursor dictionary
 cursor = db.cursor(dictionary=True)

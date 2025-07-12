@@ -2,17 +2,20 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import Login from './Login';
 
+// Reset mocks setelah setiap test
+afterEach(() => {
+  jest.resetAllMocks();
+});
+
 describe('Login component', () => {
   test('renders form inputs and button', () => {
     render(<Login setToken={jest.fn()} />);
-
     expect(screen.getByPlaceholderText(/username/i)).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/password/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /login/i })).toBeInTheDocument();
   });
 
   test('calls setToken on successful login', async () => {
-    // Mock fetch
     global.fetch = jest.fn(() =>
       Promise.resolve({
         ok: true,
@@ -23,7 +26,6 @@ describe('Login component', () => {
     const setTokenMock = jest.fn();
     render(<Login setToken={setTokenMock} />);
 
-    // Isi input form
     fireEvent.change(screen.getByPlaceholderText(/username/i), {
       target: { value: 'testuser' },
     });
@@ -31,25 +33,20 @@ describe('Login component', () => {
       target: { value: 'testpass' },
     });
 
-    // Submit form
     fireEvent.click(screen.getByRole('button', { name: /login/i }));
 
-    // Tunggu sampai setToken dipanggil
     await waitFor(() => {
       expect(setTokenMock).toHaveBeenCalledWith('fake-token');
     });
   });
 
-  test('shows alert on failed login', async () => {
+  test('shows error message on failed login', async () => {
     global.fetch = jest.fn(() =>
       Promise.resolve({
         ok: false,
         json: () => Promise.resolve({ msg: 'Invalid credentials' }),
       })
     );
-
-    // Mock alert
-    window.alert = jest.fn();
 
     render(<Login setToken={jest.fn()} />);
 
@@ -63,7 +60,36 @@ describe('Login component', () => {
     fireEvent.click(screen.getByRole('button', { name: /login/i }));
 
     await waitFor(() => {
-      expect(window.alert).toHaveBeenCalledWith('Invalid credentials');
+      expect(screen.getByText('Invalid credentials')).toBeInTheDocument();
+    });
+  });
+
+  test('shows validation error when fields are empty', async () => {
+    render(<Login setToken={jest.fn()} />);
+
+    fireEvent.click(screen.getByRole('button', { name: /login/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/wajib diisi/i)).toBeInTheDocument();
+    });
+  });
+
+  test('shows network error on fetch failure', async () => {
+    global.fetch = jest.fn(() => Promise.reject('Network error'));
+
+    render(<Login setToken={jest.fn()} />);
+
+    fireEvent.change(screen.getByPlaceholderText(/username/i), {
+      target: { value: 'user' },
+    });
+    fireEvent.change(screen.getByPlaceholderText(/password/i), {
+      target: { value: 'pass' },
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /login/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/kesalahan jaringan/i)).toBeInTheDocument();
     });
   });
 });
