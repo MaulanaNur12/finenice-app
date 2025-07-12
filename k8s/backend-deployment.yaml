@@ -14,8 +14,8 @@ spec:
     spec:
       containers:
         - name: backend
-          imagePullPolicy: Never
-          image: finenice-backend
+          image: ghcr.io/maulananur12/finenice-app-backend:latest
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5000
           env:
@@ -27,6 +27,8 @@ spec:
               value: root
             - name: DB_NAME
               value: finenice
+      imagePullSecrets:
+        - name: ghcr-secret
 ---
 apiVersion: v1
 kind: Service
