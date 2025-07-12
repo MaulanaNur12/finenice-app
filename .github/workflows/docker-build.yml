@@ -33,9 +33,3 @@ jobs:
           docker build -t $IMAGE_BACKEND_LC:latest ./backend
           docker push $IMAGE_BACKEND_LC:latest
 
-      - name: 🐳 Build & Push Frontend Image
-        run: |
-          IMAGE_FRONTEND=ghcr.io/${{ github.repository_owner }}/finenice-app-frontend
-          IMAGE_FRONTEND_LC=$(echo "$IMAGE_FRONTEND" | tr '[:upper:]' '[:lower:]')
-          docker build -t $IMAGE_FRONTEND_LC:latest ./frontend
-          docker push $IMAGE_FRONTEND_LC:latest
