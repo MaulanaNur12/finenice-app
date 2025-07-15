@@ -24,7 +24,7 @@ jobs:
 
       - name: 🛠️ Build Docker image
         run: |
-          docker build -t ghcr.io/maulananur12/finenice-backend:latest .
+          docker build -t ghcr.io/maulananur12/finenice-backend:latest ./backend
 
       - name: 🚀 Push Docker image to GHCR
         run: |
