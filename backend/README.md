@@ -27,7 +27,7 @@ backend/
 
 1. app.py 
 a Import Flask 
-\\wsl.localhost\Ubuntu\home\maula\finenice-app\backend\assets\Flask.png
+![Flask](assets/Flask.png)
 
 Kode Flask tersebut membuat aplikasi web sederhana. Pertama, program mengimpor Flask dan membuat objek aplikasi. Lalu, menggunakan `@app.route('/')` untuk menetapkan URL root (`/`) yang ketika diakses akan memunculkan teks “Hello from Flask!”. Di bagian akhir, `app.run(host='0.0.0.0', port=5000)` digunakan untuk menjalankan server pada port 5000 dan menerima koneksi dari semua alamat IP, yang berguna jika dijalankan dari lingkungan seperti WSL atau Docker. Kode ini cocok sebagai dasar untuk membangun aplikasi web atau REST API.
 
