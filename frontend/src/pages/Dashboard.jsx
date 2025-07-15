@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 
+const BASE_URL = process.env.REACT_APP_API_URL;
+
 export default function Dashboard({ token }) {
   const [products, setProducts] = useState([]);
   const [form, setForm] = useState({ name: "", price: "", stock: "" });
@@ -7,7 +9,9 @@ export default function Dashboard({ token }) {
   const [loading, setLoading] = useState(false);
 
   const fetchProducts = () => {
-    fetch("http://localhost:5000/products")
+    fetch(`${BASE_URL}/products`, {
+      credentials: "include",
+    })
       .then(res => res.json())
       .then(data => setProducts(data));
   };
@@ -36,12 +40,13 @@ export default function Dashboard({ token }) {
     if (!validateForm()) return;
     setLoading(true);
 
-    fetch("http://localhost:5000/products", {
+    fetch(`${BASE_URL}/products`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
+      credentials: "include",
       body: JSON.stringify({
         name: form.name,
         price: Number(form.price),
@@ -60,9 +65,10 @@ export default function Dashboard({ token }) {
     if (!window.confirm("Yakin ingin menghapus produk ini?")) return;
     setLoading(true);
 
-    fetch(`http://localhost:5000/products/${id}`, {
+    fetch(`${BASE_URL}/products/${id}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
+      credentials: "include",
     })
       .then(() => fetchProducts())
       .finally(() => setLoading(false));
@@ -81,12 +87,13 @@ export default function Dashboard({ token }) {
     if (!validateForm()) return;
     setLoading(true);
 
-    fetch(`http://localhost:5000/products/${editId}`, {
+    fetch(`${BASE_URL}/products/${editId}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
+      credentials: "include",
       body: JSON.stringify({
         name: form.name,
         price: Number(form.price),

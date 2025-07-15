@@ -1,12 +1,13 @@
 import { useState } from "react";
 
+const BASE_URL = process.env.REACT_APP_API_URL;
+
 export default function Register() {
   const [form, setForm] = useState({ username: "", password: "", role: "user" });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validasi sederhana
     if (!form.username.trim()) {
       alert("Username wajib diisi");
       return;
@@ -17,7 +18,7 @@ export default function Register() {
     }
 
     try {
-      const res = await fetch("http://localhost:5000/auth/register", {
+      const res = await fetch(`${BASE_URL}/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -28,7 +29,6 @@ export default function Register() {
         alert(data.msg || "Registrasi gagal");
       } else {
         alert(data.msg || "Registrasi berhasil");
-        // reset form
         setForm({ username: "", password: "", role: "user" });
       }
     } catch (error) {

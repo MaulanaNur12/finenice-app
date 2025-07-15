@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 
+const BASE_URL = process.env.REACT_APP_API_URL;
+
 export default function Checkout({ token }) {
   const [products, setProducts] = useState([]);
   const [quantities, setQuantities] = useState({});
@@ -8,7 +10,7 @@ export default function Checkout({ token }) {
 
   const fetchProducts = () => {
     setLoading(true);
-    fetch("http://localhost:5000/products")
+    fetch(`${BASE_URL}/products`)
       .then(res => {
         if (!res.ok) throw new Error("Gagal mengambil produk");
         return res.json();
@@ -59,12 +61,13 @@ export default function Checkout({ token }) {
     setCheckoutLoading(true);
 
     try {
-      const res = await fetch("http://localhost:5000/checkout", {
+      const res = await fetch(`${BASE_URL}/checkout`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
+        credentials: "include",
         body: JSON.stringify({ items }),
       });
 
@@ -75,8 +78,6 @@ export default function Checkout({ token }) {
 
       const data = await res.json();
       alert(data.msg);
-
-      // Refresh produk & reset quantity setelah checkout
       fetchProducts();
     } catch (err) {
       alert(err.message || "Gagal melakukan checkout.");

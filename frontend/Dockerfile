@@ -1,21 +1,22 @@
-# Build tahap 1: build React app
-FROM node:20-alpine AS builder
-
+# Gunakan image untuk build React
+FROM node:18 as build
 WORKDIR /app
 
+# Salin package.json dan .env terlebih dahulu agar layer caching efisien
 COPY package*.json ./
-RUN npm install --legacy-peer-deps
+COPY .env .env
 
+# Install dependencies
+RUN npm install
 
+# Salin seluruh source code lainnya
 COPY . .
+
+# Build react dengan .env sudah ada
 RUN npm run build
 
-# Build tahap 2: jalankan static server
+# Gunakan image nginx untuk serve hasil build
 FROM nginx:alpine
-
-COPY --from=builder /app/build /usr/share/nginx/html
-
-
+COPY --from=build /app/build /usr/share/nginx/html
+COPY default.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80
-
-CMD ["nginx", "-g", "daemon off;"]

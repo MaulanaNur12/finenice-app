@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+const BASE_URL = process.env.REACT_APP_API_URL;
+
 export default function Login({ setToken }) {
   const [form, setForm] = useState({ username: "", password: "" });
   const [loading, setLoading] = useState(false);
@@ -16,12 +18,15 @@ export default function Login({ setToken }) {
 
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/auth/login", {
+      const res = await fetch(`${BASE_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
+        credentials: "include",
       });
+
       const data = await res.json();
+
       if (res.ok) {
         setToken(data.access_token);
       } else {
@@ -29,8 +34,9 @@ export default function Login({ setToken }) {
       }
     } catch (err) {
       setError("Terjadi kesalahan jaringan");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (

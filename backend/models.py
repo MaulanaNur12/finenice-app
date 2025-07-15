@@ -1,12 +1,20 @@
 import os
 import mysql.connector
 
+
+
+
 db = mysql.connector.connect(
-    host=os.getenv("DB_HOST", "localhost"),      # default fallback
-    user=os.getenv("DB_USER", "root"),
-    password=os.getenv("DB_PASSWORD", "password"),
-    database=os.getenv("DB_NAME", "finenice")
+    host=os.environ.get("DB_HOST", "localhost"),
+    user=os.environ.get("DB_USER", "root"),
+    password=os.environ.get("DB_PASSWORD", ""),
+    database=os.environ.get("DB_NAME", ""),
+    port=int(os.environ.get("DB_PORT", 3306))
 )
+
+
+cursor = db.cursor()
+
 
 
 # ✅ Cursor dictionary

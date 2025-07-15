@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: finenice-backend
+  labels:
+    app: finenice-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: finenice-backend
+  template:
+    metadata:
+      labels:
+        app: finenice-backend
+    spec:
+      containers:
+        - name: flask-backend
+          image: finenice-backend:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 5000
+          env:
+            - name: JWT_SECRET_KEY
+              value: "finenice-secret"
+            - name: DB_HOST
+              value: "172.24.208.9"         # IP WSL kamu
+            - name: DB_PORT
+              value: "3306"
+            - name: DB_NAME
+              value: "finenice"
+            - name: DB_USER
+              value: "fineniceuser"
+            - name: DB_PASSWORD
+              value: "yourpassword"
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: finenice-backend-service
+  labels:
+    app: finenice-backend
+spec:
+  type: NodePort
+  selector:
+    app: finenice-backend
+  ports:
+    - port: 5000
+      targetPort: 5000
+      nodePort: 30080

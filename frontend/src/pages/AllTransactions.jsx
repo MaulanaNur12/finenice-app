@@ -5,13 +5,15 @@ export default function AllTransactions({ token }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  const BASE_URL = process.env.REACT_APP_API_URL;
+
   useEffect(() => {
     if (!token) return;
 
     setLoading(true);
     setError(null);
 
-    fetch("http://localhost:5000/transactions/all", {
+    fetch(`${BASE_URL}/transactions/all`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -27,7 +29,7 @@ export default function AllTransactions({ token }) {
         setError(err.message || "Gagal mengambil data transaksi");
       })
       .finally(() => setLoading(false));
-  }, [token]);
+  }, [token, BASE_URL]);
 
   if (loading) return <p className="text-white p-6">Loading...</p>;
   if (error) return <p className="text-red-500 p-6">Error: {error}</p>;

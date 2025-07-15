@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+import datetime
 from flask_jwt_extended import (
     JWTManager, create_access_token, jwt_required,
     get_jwt_identity, get_jwt
@@ -7,9 +8,12 @@ from flask_jwt_extended import (
 from models import db, cursor, init_db
 
 app = Flask(__name__)
-CORS(app, supports_credentials=True)
+
+# Konfigurasi CORS
+CORS(app, origins=["*"], supports_credentials=True)
 app.config['JWT_SECRET_KEY'] = 'finenice-secret'
 jwt = JWTManager(app)
+
 
 @jwt.user_identity_loader
 def user_identity_lookup(user):
@@ -24,7 +28,6 @@ init_db()
 @app.route('/auth/register', methods=['POST'])
 def register():
     data = request.json
-    # Tambahkan cursor.fetchall() agar tidak ada Unread result
     cursor.fetchall()
     cursor.execute(
         "INSERT INTO users (username, password, role) VALUES (%s, %s, %s)",
@@ -33,16 +36,31 @@ def register():
     db.commit()
     return jsonify(msg='User registered')
 
-@app.route('/auth/login', methods=['POST'])
+@app.route("/auth/login", methods=["POST"])
 def login():
-    data = request.json
-    cursor.execute("SELECT * FROM users WHERE username=%s AND password=%s",
-                   (data['username'], data['password']))
-    user = cursor.fetchone()
-    if user:
-        token = create_access_token(identity={"id": user['id'], "role": user['role']})
-        return jsonify(access_token=token)
-    return jsonify(msg='Login gagal'), 401
+    try:
+        data = request.get_json()
+        username = data.get("username")
+        password = data.get("password")
+
+        with db.cursor(dictionary=True) as cursor:
+            query = "SELECT * FROM users WHERE username = %s AND password = %s"
+            cursor.execute(query, (username, password))
+            user = cursor.fetchone()
+
+        print("User:", user)
+
+        if user and "id" in user and "role" in user:
+            token = create_access_token(identity=user)
+            return jsonify({"access_token": token})
+        else:
+            return jsonify({"msg": "Invalid username or password"}), 401
+    except Exception as e:
+        print("Login error:", e)
+        return jsonify({"msg": "Server error", "error": str(e)}), 500
+
+
+
 
 @app.route('/products', methods=['GET'])
 def list_products():
@@ -55,7 +73,7 @@ def add_product():
     if get_jwt()["role"] != 'admin':
         return jsonify(msg='Unauthorized'), 403
     data = request.json
-    price = int(str(data['price']).lstrip('0') or '0')  # Hapus 0 depan
+    price = int(str(data['price']).lstrip('0') or '0')
     stock = int(str(data['stock']).lstrip('0') or '0')
     cursor.execute("INSERT INTO products (name, price, stock) VALUES (%s, %s, %s)",
                    (data['name'], price, stock))
@@ -90,7 +108,6 @@ def checkout():
     user_id = int(get_jwt_identity())
     items = request.json['items']
 
-    # Validasi stok
     for i in items:
         cursor.execute("SELECT stock FROM products WHERE id = %s", (i['id'],))
         product = cursor.fetchone()
@@ -99,12 +116,10 @@ def checkout():
         if product['stock'] < i['qty']:
             return jsonify(msg=f"Stok tidak cukup untuk produk ID {i['id']}"), 400
 
-    # Simpan transaksi
     total = sum(i['qty'] * i['price'] for i in items)
     cursor.execute("INSERT INTO transactions (user_id, total) VALUES (%s, %s)", (user_id, total))
     trx_id = cursor.lastrowid
 
-    # Simpan item dan kurangi stok
     for i in items:
         cursor.execute(
             "INSERT INTO transaction_items (transaction_id, product_id, quantity, price) VALUES (%s, %s, %s, %s)",
@@ -117,8 +132,6 @@ def checkout():
 
     db.commit()
     return jsonify(msg='Transaksi berhasil')
-
-
 
 @app.route('/transactions', methods=['GET'])
 @jwt_required()
@@ -152,7 +165,6 @@ def get_all_transactions():
     cursor.execute(query)
     rows = cursor.fetchall()
 
-    # Gabungkan item-item per transaksi
     transactions = {}
     for row in rows:
         trx_id = row["transaction_id"]
@@ -172,6 +184,9 @@ def get_all_transactions():
         })
 
     return jsonify(list(transactions.values()))
+@app.route('/')
+def index():
+    return 'Hello from Flask!'
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)

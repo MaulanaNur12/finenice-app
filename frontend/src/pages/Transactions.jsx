@@ -4,21 +4,23 @@ export default function Transactions({ token }) {
   const [trx, setTrx] = useState([]);
   const [error, setError] = useState("");
 
+  const BASE_URL = process.env.REACT_APP_API_URL;
+
   useEffect(() => {
     if (!token) {
       setError("Token tidak tersedia, silakan login.");
       return;
     }
 
-    console.log("TOKEN SAAT FETCH TRANSAKSI:", token); // Debug token
+    console.log("TOKEN SAAT FETCH TRANSAKSI:", token);
 
-    fetch("http://localhost:5000/transactions", {
+    fetch(`${BASE_URL}/transactions`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     })
       .then((res) => {
-        console.log("RESPON STATUS:", res.status); // Debug status
+        console.log("RESPON STATUS:", res.status);
         if (!res.ok) {
           throw new Error("Gagal mengambil data transaksi");
         }
@@ -39,7 +41,7 @@ export default function Transactions({ token }) {
         setError("Terjadi kesalahan saat mengambil data transaksi.");
         setTrx([]);
       });
-  }, [token]);
+  }, [token, BASE_URL]);
 
   return (
     <div className="p-4">

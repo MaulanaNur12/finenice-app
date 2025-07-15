@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 
+const BASE_URL = process.env.REACT_APP_API_URL;
+console.log("BASE_URL:", BASE_URL);
+
 export default function Products({ token, isAdmin }) {
   const [products, setProducts] = useState([]);
   const [form, setForm] = useState({ name: "", price: "", stock: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Untuk modal update
   const [updateModalOpen, setUpdateModalOpen] = useState(false);
   const [updateData, setUpdateData] = useState({ id: null, name: "", price: "", stock: "" });
 
@@ -14,7 +16,7 @@ export default function Products({ token, isAdmin }) {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("http://localhost:5000/products");
+      const res = await fetch(`${BASE_URL}/products`);
       if (!res.ok) throw new Error("Gagal fetch produk");
       const data = await res.json();
       setProducts(data);
@@ -29,13 +31,12 @@ export default function Products({ token, isAdmin }) {
   }, []);
 
   const handleAdd = async () => {
-    // Validasi sederhana
     if (!form.name.trim()) return alert("Nama produk wajib diisi");
     if (!form.price || isNaN(form.price) || form.price <= 0) return alert("Harga harus angka > 0");
     if (!form.stock || isNaN(form.stock) || form.stock < 0) return alert("Stok harus angka >= 0");
 
     try {
-      const res = await fetch("http://localhost:5000/products", {
+      const res = await fetch(`${BASE_URL}/products`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -60,7 +61,7 @@ export default function Products({ token, isAdmin }) {
   const handleDelete = async (id) => {
     if (!window.confirm("Yakin ingin menghapus produk ini?")) return;
     try {
-      const res = await fetch(`http://localhost:5000/products/${id}`, {
+      const res = await fetch(`${BASE_URL}/products/${id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -91,13 +92,12 @@ export default function Products({ token, isAdmin }) {
   };
 
   const handleUpdateSubmit = async () => {
-    // Validasi sederhana
     if (!updateData.name.trim()) return alert("Nama produk wajib diisi");
     if (!updateData.price || isNaN(updateData.price) || updateData.price <= 0) return alert("Harga harus angka > 0");
     if (!updateData.stock || isNaN(updateData.stock) || updateData.stock < 0) return alert("Stok harus angka >= 0");
 
     try {
-      const res = await fetch(`http://localhost:5000/products/${updateData.id}`, {
+      const res = await fetch(`${BASE_URL}/products/${updateData.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -184,7 +184,6 @@ export default function Products({ token, isAdmin }) {
         ))}
       </div>
 
-      {/* Modal Update */}
       {updateModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
           <div className="bg-gray-800 p-6 rounded shadow-lg max-w-md w-full space-y-4">
