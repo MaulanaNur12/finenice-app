@@ -6,7 +6,7 @@ Backend Finenice App dapat dideploy ke dalam cluster Kubernetes menggunakan file
 
 ## 📄 Struktur `finenice-backend.yaml`
 
-
+```yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:

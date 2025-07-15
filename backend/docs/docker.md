@@ -33,9 +33,6 @@ docker build -t finenice-backend .
 🚀 Menjalankan Container
 Setelah image berhasil dibuat, kamu bisa menjalankan container dengan:
 
-bash
-Salin
-Edit
 docker run -p 5000:5000 finenice-backend
 Penjelasan:
 
