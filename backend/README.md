@@ -1,39 +1,111 @@
-# 📦 Finenice Backend API
-
-Backend untuk aplikasi Finenice — sistem manajemen produk dan transaksi menggunakan Flask, JWT, dan MySQL.
+Oke! Berikut adalah **README utama** (`README.md`) untuk proyek backend **Finenice App** yang merangkum deskripsi, struktur direktori, cara penggunaan singkat, serta mengarahkan pembaca ke dokumentasi lengkap di folder `docs/`.
 
 ---
 
-## 🚀 Cara Menjalankan
+### 📄 `README.md`
+
+```markdown
+# 🔧 Finenice App - Backend
+
+Finenice App Backend adalah REST API yang dibangun menggunakan **Python Flask**, digunakan untuk mengelola:
+
+- ✅ Autentikasi & Login
+- 📦 Produk
+- 💳 Transaksi & Checkout
+
+API ini terhubung ke database **MySQL** dan sudah mendukung deployment dengan **Docker** & **Kubernetes**.
+
+---
+
+## 🚀 Fitur Utama
+
+- JSON Web Token (JWT) untuk autentikasi & otorisasi
+- Role-based Access (admin & user)
+- Integrasi CORS untuk komunikasi dengan frontend
+- CRUD Produk
+- Checkout & Riwayat Transaksi
+- Container-ready & cloud-native
+
+---
+
+## 📁 Struktur Proyek
+
+```
+
+.
+├── app.py
+├── models.py
+├── requirements.txt
+├── Dockerfile
+├── finenice-backend.yaml
+├── .env                 # Opsional (untuk lokal)
+└── docs/                # 📚 Dokumentasi lengkap
+
+````
+
+---
+
+## ▶️ Cara Menjalankan
+
+### 1. Lokal
 
 ```bash
-# Clone repo
-git clone https://github.com/MaulanaNur12/finenice-app.git
-cd finenice-app/backend
-
-# Install dependencies
 pip install -r requirements.txt
-
-# Jalankan server
 python app.py
+````
 
-backend/
-├── app.py                # Main Flask App
-├── models.py             # Koneksi ke database & inisialisasi
-├── requirements.txt      # Daftar dependensi Python
-├── Dockerfile            # instruksi untuk membuat image Docker
-├── finenice-backend.yaml # digunakan untuk mendefinisikan Deployment dan Service di Kubernetes agar backend
-└── README.md             # Dokumentasi backend ini
+### 2. Docker
 
-1. app.py 
-a Import Flask 
-# Dokumentasi Backend
+```bash
+docker build -t finenice-backend .
+docker run -p 5000:5000 finenice-backend
+```
 
-Berikut adalah gambar ilustrasi Flask:
+### 3. Kubernetes
 
-![Flask](https://github.com/MaulanaNur12/finenice-app/blob/main/backend/assets/Flask.png?raw=true)
+```bash
+kubectl apply -f finenice-backend.yaml
+```
 
+---
 
-Kode Flask tersebut membuat aplikasi web sederhana. Pertama, program mengimpor Flask dan membuat objek aplikasi. Lalu, menggunakan `@app.route('/')` untuk menetapkan URL root (`/`) yang ketika diakses akan memunculkan teks “Hello from Flask!”. Di bagian akhir, `app.run(host='0.0.0.0', port=5000)` digunakan untuk menjalankan server pada port 5000 dan menerima koneksi dari semua alamat IP, yang berguna jika dijalankan dari lingkungan seperti WSL atau Docker. Kode ini cocok sebagai dasar untuk membangun aplikasi web atau REST API.
+## 📚 Dokumentasi
 
+Dokumentasi lengkap tersedia di folder [`docs/`](./docs):
 
+| File                                    | Deskripsi                          |
+| --------------------------------------- | ---------------------------------- |
+| [`overview.md`](./docs/overview.md)     | Ringkasan dan tujuan backend       |
+| [`structure.md`](./docs/structure.md)   | Struktur file & penjelasannya      |
+| [`tech.md`](./docs/tech.md)             | Teknologi & library yang digunakan |
+| [`docker.md`](./docs/docker.md)         | Penjelasan Dockerfile & cara pakai |
+| [`kubernetes.md`](./docs/kubernetes.md) | Deployment di Kubernetes           |
+| [`usage.md`](./docs/usage.md)           | Cara menjalankan di semua mode     |
+| [`api.md`](./docs/api.md)               | Dokumentasi endpoint API           |
+| [`license.md`](./docs/license.md)       | Informasi lisensi                  |
+
+---
+
+## ⚠️ Catatan
+
+> Proyek ini dibuat untuk pembelajaran dan tidak disarankan langsung digunakan di production tanpa penyesuaian tambahan seperti enkripsi password, logging, dan pengamanan lainnya.
+
+---
+
+## 📝 Lisensi
+
+Bebas digunakan, dimodifikasi, dan dikembangkan lebih lanjut. Lihat [license.md](./docs/license.md) untuk detail.
+
+---
+
+## 💡 Kontribusi
+
+Pull request dan feedback sangat diterima. Kamu bisa mulai dari dokumentasi, refactor, atau penambahan fitur baru.
+
+```
+
+---
+
+README ini sudah mengarahkan pembaca ke seluruh dokumentasi yang kamu susun di folder `docs/`, dan sekaligus menjelaskan cara pakai proyek secara ringkas.
+
+```
