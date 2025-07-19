@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import TransactionsTable from "../components/TransactionsTable";
 
 export default function Transactions({ token }) {
   const [trx, setTrx] = useState([]);
@@ -12,22 +13,18 @@ export default function Transactions({ token }) {
       return;
     }
 
-    console.log("TOKEN SAAT FETCH TRANSAKSI:", token);
-
     fetch(`${BASE_URL}/transactions`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     })
       .then((res) => {
-        console.log("RESPON STATUS:", res.status);
         if (!res.ok) {
           throw new Error("Gagal mengambil data transaksi");
         }
         return res.json();
       })
       .then((data) => {
-        console.log("DATA TRANSAKSI:", data);
         if (Array.isArray(data)) {
           setTrx(data);
           setError("");
@@ -45,19 +42,15 @@ export default function Transactions({ token }) {
 
   return (
     <div className="p-4">
-      <h2 className="text-xl font-bold mb-2">My Transactions</h2>
-      {error && <p className="text-red-500">{error}</p>}
-      {!error && trx.length === 0 && <p>Belum ada transaksi.</p>}
-      <ul className="space-y-2">
-        {trx.map((t) => (
-          <li
-            key={t.id}
-            className="border p-2 rounded shadow-sm bg-white text-black"
-          >
-            <strong>#{t.id}</strong> - Total: Rp{t.total.toLocaleString()}
-          </li>
-        ))}
-      </ul>
+      <h2 className="text-2xl font-semibold mb-4">My Transactions</h2>
+
+      {error && <p className="text-red-500 mb-4">{error}</p>}
+
+      {!error && trx.length === 0 && (
+        <p className="text-gray-400">Belum ada transaksi.</p>
+      )}
+
+      {!error && trx.length > 0 && <TransactionsTable data={trx} />}
     </div>
   );
 }

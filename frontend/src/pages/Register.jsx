@@ -1,82 +1,83 @@
 import { useState } from "react";
-
-const BASE_URL = process.env.REACT_APP_API_URL;
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 export default function Register() {
-  const [form, setForm] = useState({ username: "", password: "", role: "user" });
+  const [form, setForm] = useState({
+    name: "",
+    username: "",
+    password: "",
+    role: "user",
+  });
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+
+  const handleChange = (e) =>
+    setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!form.username.trim()) {
-      alert("Username wajib diisi");
-      return;
-    }
-    if (!form.password.trim()) {
-      alert("Password wajib diisi");
-      return;
-    }
-
     try {
-      const res = await fetch(`${BASE_URL}/auth/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-      const data = await res.json();
-
-      if (!res.ok) {
-        alert(data.msg || "Registrasi gagal");
-      } else {
-        alert(data.msg || "Registrasi berhasil");
-        setForm({ username: "", password: "", role: "user" });
-      }
-    } catch (error) {
-      alert("Terjadi kesalahan jaringan");
-      console.error(error);
+      await axios.post("/api/auth/register", form);
+      navigate("/login");
+    } catch (err) {
+      setError("Registration failed. Try again.");
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-900">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-gray-800 text-white p-8 rounded shadow-md w-full max-w-sm space-y-4"
-      >
-        <h2 className="text-2xl font-bold text-center">Register</h2>
-
-        <input
-          type="text"
-          placeholder="Username"
-          value={form.username}
-          onChange={(e) => setForm({ ...form, username: e.target.value })}
-          className="w-full px-4 py-2 bg-white text-black rounded focus:outline-none"
-        />
-
-        <input
-          type="password"
-          placeholder="Password"
-          value={form.password}
-          onChange={(e) => setForm({ ...form, password: e.target.value })}
-          className="w-full px-4 py-2 bg-white text-black rounded focus:outline-none"
-        />
-
-        <select
-          value={form.role}
-          onChange={(e) => setForm({ ...form, role: e.target.value })}
-          className="w-full px-4 py-2 bg-white text-black rounded focus:outline-none"
-        >
-          <option value="user">User</option>
-          <option value="admin">Admin</option>
-        </select>
-
-        <button
-          type="submit"
-          className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded"
-        >
-          Register
-        </button>
-      </form>
+    <div className="flex items-center justify-center min-h-screen bg-gray-900 px-4">
+      <div className="w-full max-w-md bg-gray-800 p-8 rounded-2xl shadow-lg">
+        <h2 className="text-2xl font-bold mb-6 text-center text-white">Create an Account</h2>
+        {error && <div className="mb-4 text-red-500 text-sm">{error}</div>}
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div>
+            <label htmlFor="name" className="block text-sm font-medium mb-1 text-white">
+              Name
+            </label>
+            <input
+              type="text"
+              name="name"
+              value={form.name}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+            />
+          </div>
+          <div>
+            <label htmlFor="username" className="block text-sm font-medium mb-1 text-white">
+              Username
+            </label>
+            <input
+              type="text"
+              name="username"
+              value={form.username}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+            />
+          </div>
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium mb-1 text-white">
+              Password
+            </label>
+            <input
+              type="password"
+              name="password"
+              value={form.password}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+            />
+          </div>
+          <button
+            type="submit"
+            className="w-full py-2 rounded-lg bg-green-600 hover:bg-green-500 transition text-white font-semibold"
+          >
+            Register
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

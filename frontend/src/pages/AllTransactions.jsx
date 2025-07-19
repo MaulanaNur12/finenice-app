@@ -1,17 +1,17 @@
 import { useEffect, useState } from "react";
+import TransactionsTable from "../components/TransactionsTable";
 
 export default function AllTransactions({ token }) {
-  const [transactions, setTransactions] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [trx, setTrx] = useState([]);
+  const [error, setError] = useState("");
 
   const BASE_URL = process.env.REACT_APP_API_URL;
 
   useEffect(() => {
-    if (!token) return;
-
-    setLoading(true);
-    setError(null);
+    if (!token) {
+      setError("Token tidak tersedia, silakan login.");
+      return;
+    }
 
     fetch(`${BASE_URL}/transactions/all`, {
       headers: {
@@ -19,45 +19,38 @@ export default function AllTransactions({ token }) {
       },
     })
       .then((res) => {
-        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        if (!res.ok) {
+          throw new Error("Gagal mengambil data semua transaksi");
+        }
         return res.json();
       })
       .then((data) => {
-        setTransactions(data);
+        if (Array.isArray(data)) {
+          setTrx(data);
+          setError("");
+        } else {
+          setError("Data transaksi tidak valid.");
+          setTrx([]);
+        }
       })
       .catch((err) => {
-        setError(err.message || "Gagal mengambil data transaksi");
-      })
-      .finally(() => setLoading(false));
+        console.error("FETCH ERROR:", err);
+        setError("Terjadi kesalahan saat mengambil data transaksi.");
+        setTrx([]);
+      });
   }, [token, BASE_URL]);
 
-  if (loading) return <p className="text-white p-6">Loading...</p>;
-  if (error) return <p className="text-red-500 p-6">Error: {error}</p>;
-
   return (
-    <div className="text-white p-6">
-      <h2 className="text-2xl font-bold mb-4">Semua Transaksi</h2>
-      {transactions.length === 0 ? (
-        <p>Belum ada transaksi.</p>
-      ) : (
-        <div className="space-y-6">
-          {transactions.map((t) => (
-            <div key={t.id} className="bg-gray-800 p-4 rounded">
-              <p className="font-semibold">ID Transaksi: {t.id}</p>
-              <p>User ID: {t.user_id}</p>
-              <p>Total: Rp{t.total.toLocaleString()}</p>
-              <p>Tanggal: {new Date(t.created_at).toLocaleString()}</p>
-              <ul className="list-disc list-inside mt-2">
-                {(t.items ?? []).map((item) => (
-                  <li key={item.id ?? item.product_name}>
-                    {item.product_name} - Qty: {item.quantity} - Rp{item.price.toLocaleString()}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
+    <div className="p-4">
+      <h2 className="text-2xl font-semibold mb-4">All Transactions (Admin)</h2>
+
+      {error && <p className="text-red-500 mb-4">{error}</p>}
+
+      {!error && trx.length === 0 && (
+        <p className="text-gray-400">Belum ada transaksi tercatat.</p>
       )}
+
+      {!error && trx.length > 0 && <TransactionsTable data={trx} />}
     </div>
   );
 }
